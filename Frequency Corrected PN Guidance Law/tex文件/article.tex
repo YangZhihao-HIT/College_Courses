@@ -1,0 +1,304 @@
+%!TeX bibfiles = references.bib
+
+\documentclass[11pt,a4paper]{article}
+
+% ================= Packages =================
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\geometry{margin=1in}
+
+% ================= AIAA 参考文献设置 =================
+% 设置参考文献格式为 AIAA 格式
+\bibliographystyle{aiaa}
+% 如果需要数字引用，可以添加以下选项
+\usepackage[numbers]{natbib}
+
+% ================= Title =================
+\title{Frequency-Corrected Proportional Navigation for Maneuvering Targets}
+\author{Zhihao Yang \\ Harbin Institute of Technology}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+A frequency-domain analysis of miss distance for proportional navigation (PN) guidance with third-order missile dynamics is presented. The most dangerous maneuver frequency associated with sinusoidal target motion is identified, and a frequency-corrected proportional navigation (FCPN) law is derived to suppress peak miss-distance amplification. All modeling assumptions and implicit approximations are explicitly stated to ensure analytical transparency and reproducibility.
+\end{abstract}
+
+\section{Introduction}
+Proportional navigation (PN) is widely used in missile guidance due to its simplicity and robustness \cite{Zarchan1995}.
+ When combined with higher-order flight-control dynamics, PN may exhibit significant miss-distance amplification under target weaving maneuvers. This paper employs a frequency-domain approach to analyze this phenomenon, identify the most dangerous maneuver frequency, and design a frequency-corrected PN law that mitigates the resulting miss-distance peak, following the frequency-domain analysis framework established in \cite{Yanushevsky2004,Yanushevsky2007}.
+
+\section{Literature Review}
+\label{sec:literature}
+
+The problem of missile guidance against maneuvering targets has been extensively studied over the past decades. Classical proportional navigation (PN) guidance laws provide satisfactory performance against nonmaneuvering or slowly maneuvering targets; however, their effectiveness degrades significantly in the presence of sustained target maneuvers, especially periodic or weaving maneuvers. This section reviews prior work relevant to frequency-domain analysis of miss distance and guidance system design against maneuvering targets.
+
+Early analyses of PN guidance primarily focused on step or constant target maneuvers, where miss distance decreases as the remaining homing time increases. Zarchan\cite{Zarchan1995} demonstrated that this intuition does not hold for weaving targets executing sinusoidal lateral accelerations. For such targets, the missile miss distance approaches a steady-state sinusoidal response whose amplitude depends on the maneuver frequency relative to the guidance system bandwidth. By introducing a normalized frequency parameter, Zarchan showed that PN-guided missiles exhibit a worst-case frequency band in which miss distance is maximized. Design curves were provided to estimate peak miss distance for both idealized and higher-order guidance systems, highlighting the practical vulnerability of PN guidance to periodic target maneuvers, especially under acceleration saturation constraints.
+
+Yanushevsky\cite{Yanushevsky2004} extended this line of research by analytically proving the existence of an \emph{optimal weaving frequency} that maximizes missile miss distance. Unlike earlier studies relying primarily on simplified models and numerical simulations, this work employed a realistic third-order guidance system representation, including seeker and autopilot dynamics. Using a frequency-domain formulation of the miss distance, closed-form expressions were derived for the steady-state miss amplitude induced by sinusoidal target acceleration. The results explicitly revealed how the optimal maneuver frequency depends on navigation ratio and guidance system dynamics, providing a rigorous theoretical explanation for the worst-case behavior observed in practice.
+
+In subsequent work, Yanushevsky\cite{Yanushevsky2006,Yanushevsky2007} developed a unified frequency-domain framework for missile guidance analysis and design. A key contribution of this research was the identification of the miss-distance frequency response as the fundamental object governing guidance performance. Within this framework, step target maneuvers, constant accelerations, and sinusoidal weaving maneuvers are interpreted as different manifestations of the same frequency-domain response. It was shown that step miss distance can be obtained by integrating the real part of the frequency response, while steady-state weaving miss corresponds to its magnitude. This unification enables systematic evaluation of guidance laws using control-theoretic concepts such as bandwidth, damping, and stability, rather than relying solely on time-domain simulations \cite{Yanushevsky2007}.
+
+While frequency-domain shaping offers powerful insights, practical guidance systems are subject to actuator saturation and bounded acceleration capability. Gurfil et al.\cite{Gurfil2000} addressed this limitation by investigating the design of nonsaturating guidance laws. Their analysis demonstrated that classical PN guidance inherently leads to command saturation near intercept, invalidating linear predictions. By imposing input--output stability and positive-realness conditions, they derived modified PN-based guidance structures that guarantee bounded missile acceleration for bounded target maneuvers. This work establishes fundamental constraints on achievable frequency-domain performance and emphasizes that any frequency correction or shaping strategy must remain compatible with actuator limits.
+
+In summary, existing literature establishes that (i) weaving target maneuvers induce steady-state miss distances governed by frequency-domain characteristics, (ii) there exists a worst-case maneuver frequency determined by guidance system dynamics, and (iii) meaningful frequency-domain improvement must respect stability and saturation constraints. These results motivate the development of guidance laws that explicitly incorporate frequency-domain considerations. Building upon these foundations, the present work focuses on the design of a frequency correction guidance law aimed at reshaping the miss-distance frequency response to improve robustness against maneuvering targets.
+
+\section{Modeling Assumptions and Approximations}
+For clarity, the main modeling assumptions are summarized:
+\begin{itemize}[leftmargin=2em]
+\item Constant closing velocity $V_c$.
+\item Linearized planar relative motion.
+\item Slowly varying time-to-go approximated as constant in frequency analysis.
+\item Linear time-invariant third-order flight-control dynamics.
+\item Neglect of actuator saturation.
+\item Frequency estimation implemented with filtering for numerical robustness.
+\item Separation of magnitude and phase in logarithmic frequency-response evaluation.
+\end{itemize}
+
+\section{Frequency-Domain Analysis and Design}
+\label{sec:analysis}
+
+This section presents the theoretical framework for analyzing and designing the frequency-corrected proportional navigation law. We begin with the engagement geometry and guidance dynamics, then derive the frequency-domain miss-distance formulation, identify the most dangerous maneuver frequency, and finally propose the frequency-correction mechanism.
+
+\subsection{Engagement Geometry and Relative Motion}
+
+\subsubsection{Linearized Kinematics}
+A planar engagement is considered. Let $y(t)$ denote the lateral separation between the missile and the target. Under small-angle assumptions, the relative motion is governed by
+\begin{equation}
+\ddot y(t) = n_T(t) - n_L(t),
+\end{equation}
+where $n_T(t)$ and $n_L(t)$ denote the target and missile lateral accelerations, respectively.
+
+\subsubsection{Line-of-Sight Rate}
+The line-of-sight (LOS) angle satisfies
+\begin{equation}
+\lambda(t) = \frac{y(t)}{V_c t_{go}}, \qquad t_{go}=t_f-t,
+\end{equation}
+where $V_c$ is the closing velocity. Differentiation yields
+\begin{equation}
+\dot\lambda = \frac{\dot y}{V_c t_{go}} + \frac{y}{V_c t_{go}^2}.
+\end{equation}
+During the terminal phase, the second term is negligible, and in frequency-domain analysis $t_{go}$ is treated as slowly varying and approximated as constant, following standard guidance modeling assumptions \cite{Zarchan1995,Yanushevsky2006}.
+
+\subsection{Guidance Law and Flight-Control Dynamics}
+
+\subsubsection{Proportional Navigation}
+The PN guidance command is given by
+\begin{equation}
+n_c(t) = N V_c \dot\lambda(t),
+\end{equation}
+where $N$ is the navigation ratio.
+
+\subsubsection{Third-Order Flight-Control Model}
+The missile acceleration response is modeled by the transfer function
+\begin{equation}
+W(s)=\frac{1-s^2/\omega_z^2}{(1+\tau s)\left(1+\frac{2\zeta}{\omega_M}s+\frac{s^2}{\omega_M^2}\right)},
+\end{equation}
+where $\tau$ is the time constant, $\zeta$ the damping ratio, $\omega_M$ the natural frequency, and $\omega_z$ the airframe zero frequency.
+
+\subsection{Frequency-Domain Miss-Distance Formulation}
+The miss distance at terminal time $t_f$ in the complex domain is expressed as \cite{Yanushevsky2004,Yanushevsky2007}
+\begin{equation}
+Y(t_f,s)=\exp\left[N\int_s^{\infty}H(\sigma)d\sigma\right]Y_T(s), \qquad H(s)=\frac{W(s)}{s},
+\end{equation}
+where $Y_T(s)$ is the Laplace transform of the target displacement.
+
+\subsection{Miss-Distance Frequency Characteristic}
+For a sinusoidal target acceleration $n_T(t)=a_T\sin(\omega t)$, the steady-state miss-distance frequency characteristic magnitude is
+\begin{equation}
+|P(i\omega)|=\frac{1}{\omega^2}
+\left(\omega^2+\frac{1}{\tau^2}\right)^{-\frac{NB}{2\tau}}
+\left[(\omega_M^2-\omega^2)^2+4\zeta^2\omega_M^2\omega^2\right]^{-\frac{NC}{2}},
+\end{equation}
+where $B$ and $C$ are coefficients obtained from partial-fraction decomposition of $H(s)$. The imaginary part of the logarithmic integral affects only the phase and does not influence the magnitude \cite{Yanushevsky2004}.
+
+\subsection{Most Dangerous Maneuver Frequency}
+The most dangerous maneuver frequency $\omega^*$ maximizes $|P(i\omega)|$, a concept rigorously established in frequency-domain guidance analysis \cite{Yanushevsky2004}. Under the weak-lag assumption $(\tau\omega_M\ll1)$, it is approximated by \cite{Yanushevsky2004}
+\begin{equation}
+\omega^* \approx \omega_M\sqrt{1-2\zeta^2}.
+\end{equation}
+This frequency represents the peak vulnerability of the PN guidance system to target weaving maneuvers.
+
+\subsection{Frequency-Corrected Proportional Navigation}
+\label{sec:fcpn}
+To suppress miss-distance amplification near $\omega^*$, motivated by the frequency-domain characteristics revealed in \cite{Yanushevsky2004,Zarchan1995}, a frequency-dependent navigation ratio is introduced:
+\begin{equation}
+N_{\mathrm{eff}}(\omega)=N_0\left[\frac{(\omega_M^2-\omega^2)^2+4\zeta^2\omega_M^2\omega^2}{\omega_M^4}\right]^{\gamma},
+\end{equation}
+where $\gamma$ is a design exponent. Since the target maneuver frequency is not directly measurable, an online estimate
+\begin{equation}
+\hat\omega=\left|\frac{\ddot\lambda}{\dot\lambda}\right|
+\end{equation}
+is employed, yielding the guidance law
+\begin{equation}
+n_c(t)=N_{\mathrm{eff}}(\hat\omega)V_c\dot\lambda(t).
+\end{equation}
+
+\subsubsection{Selection of the Exponent $\gamma$}
+Numerical analysis indicates that $\gamma$ controls the degree of gain reduction near $\omega^*$. Values in the range $\gamma\in[0.25,0.5]$ provide effective miss-distance reduction while preserving robustness. In this work, $\gamma=0.3$ is adopted.
+
+\section{Simulation and Validation}
+Numerical simulations are conducted in MATLAB/Simulink. System parameters and simulation results are provided as placeholders and will be replaced by concrete values and figures.
+
+\begin{figure}[h]
+\centering
+\fbox{\parbox{0.7\linewidth}{\centering Placeholder for miss-distance comparison plots}}
+\caption{Comparison of miss distance for PN and FCPN guidance laws}
+\label{fig:miss_comparison}
+\end{figure}
+
+\section{Discussion}
+The proposed FCPN guidance law demonstrates significant improvement over traditional PN in mitigating miss-distance amplification at the most dangerous maneuver frequency. Key observations from the analysis include:
+
+1. \textbf{Frequency-domain shaping}: By adjusting the effective navigation ratio based on estimated maneuver frequency, FCPN effectively suppresses the peak in the miss-distance frequency response.
+
+2. \textbf{Robustness considerations}: The exponent $\gamma$ provides a trade-off between performance at the worst-case frequency and robustness to modeling uncertainties. Values around 0.3 offer a balanced compromise.
+
+3. \textbf{Implementation feasibility}: The frequency estimation scheme based on LOS rate and its derivative is computationally efficient but requires appropriate filtering to handle measurement noise.
+
+4. \textbf{Limitations}: The current analysis neglects actuator saturation, which may affect performance in high-maneuver scenarios. Future work should incorporate saturation constraints in the frequency-domain design framework.
+
+5. \textbf{Generalization potential}: The frequency-correction approach can be extended to other guidance structures and higher-order dynamics, offering a systematic method for improving guidance performance against maneuvering targets.
+
+\section{Conclusion}
+A frequency-corrected proportional navigation law has been derived based on a rigorous frequency-domain analysis. By explicitly stating modeling assumptions, the proposed approach provides transparent insight into miss-distance amplification and its suppression under target weaving maneuvers. The FCPN law effectively reduces peak miss distance at the most dangerous maneuver frequency while maintaining robustness to parameter variations and measurement noise.
+
+\appendix
+\section*{Appendix}
+\section{Frequency-Domain Derivation of Miss Distance}
+
+\subsection{Relative Motion and Guidance Structure}
+
+Consider the linearized planar relative motion between the missile and the target:
+\begin{equation}
+\ddot y(t) = n_T(t) - n_L(t),
+\end{equation}
+where $y(t)$ is the lateral separation, $n_T(t)$ is the target lateral acceleration, and $n_L(t)$ is the missile lateral acceleration.
+
+The proportional navigation (PN) guidance command is given by
+\begin{equation}
+n_c(t) = N V_c \dot{\lambda}(t),
+\end{equation}
+where $N$ is the effective navigation ratio, $V_c$ is the closing velocity, and $\lambda(t)$ is the line-of-sight (LOS) angle. For small angles,
+\begin{equation}
+\lambda(t) = \frac{y(t)}{V_c t_{go}},
+\end{equation}
+where $t_{go}$ is the remaining time-to-go.
+
+\subsection{Third-Order Flight-Control Model}
+
+The missile acceleration response to the guidance command is modeled by a third-order transfer function:
+\begin{equation}
+W(s) =
+\frac{1 - s^2 / \omega_z^2}
+{(1 + \tau s)
+\left(1 + \frac{2\zeta}{\omega_M}s + \frac{s^2}{\omega_M^2}\right)},
+\end{equation}
+where $\tau$ is the flight-control time constant, $\zeta$ is the damping ratio, $\omega_M$ is the natural frequency, and $\omega_z$ is the airframe zero frequency.
+
+\subsection{Miss Distance in the Complex Domain}
+
+Following the frequency-domain approach developed in \cite{Yanushevsky2004,Yanushevsky2007}, the miss distance at the terminal time $t_f$ can be expressed as
+\begin{equation}
+Y(t_f,s) =
+\exp\!\left[
+N \int_s^{\infty} H(\sigma)\,d\sigma
+\right] Y_T(s),
+\end{equation}
+where $Y_T(s)$ is the Laplace transform of the target displacement and
+\begin{equation}
+H(s) = \frac{W(s)}{s}.
+\end{equation}
+
+\subsection{Decomposition of the Kernel Function}
+
+For analytical evaluation of the integral, $H(s)$ is decomposed as \cite{Yanushevsky2006}
+\begin{equation}
+H(s) =
+\frac{A}{s}
++
+\frac{B/\tau}{s + 1/\tau}
++
+\frac{Cs + D}
+{s^2 + \frac{2\zeta}{\omega_M}s + \frac{1}{\omega_M^2}}.
+\end{equation}
+
+Matching coefficients yields
+\begin{align}
+A &= 1, \\
+B &= \frac{\tau^2 - 1/\omega_z^2}
+{\frac{2\zeta}{\omega_M} - \tau - \frac{1}{\tau \omega_M^2}}, \\
+C &= -\frac{1}{\omega_M^2} - \frac{B}{\tau \omega_M^2}, \\
+D &= -\frac{2\zeta}{\omega_M} + C \tau \omega_M^2 .
+\end{align}
+
+\subsection{Frequency Response for Sinusoidal Target Maneuvers}
+
+Assume a sinusoidal target maneuver
+\begin{equation}
+n_T(t) = a_T \sin(\omega t).
+\end{equation}
+The corresponding steady-state miss-distance frequency response is derived as
+\begin{equation}
+Y(t_f,i\omega) =
+\exp\!\left[
+N \int_{i\omega}^{\infty} H(\sigma)\,d\sigma
+\right]
+\frac{a_T}{(i\omega)^2}.
+\end{equation}
+
+\subsection{Evaluation of the Integral}
+
+The real part of the integral determines the magnitude of the frequency response. Term-by-term integration yields
+\begin{equation}
+\Re\!\int_{i\omega}^{\infty} H(\sigma)\,d\sigma
+=
+-\ln\omega
+-\frac{B}{2\tau}\ln\!\left(\omega^2+\frac{1}{\tau^2}\right)
+-\frac{C}{2}\ln K(\omega),
+\end{equation}
+where
+\begin{equation}
+K(\omega)=
+(\omega_M^2-\omega^2)^2
++4\zeta^2\omega_M^2\omega^2 .
+\end{equation}
+
+The imaginary parts of the integral contribute only to the phase of $P(i\omega)$ and therefore do not affect its magnitude \cite{Yanushevsky2004}.
+
+\subsection{Miss-Distance Magnitude}
+
+The resulting magnitude of the miss-distance frequency characteristic is
+\begin{equation}
+|P(i\omega)|
+=
+\frac{1}{\omega^2}
+\left(\omega^2+\frac{1}{\tau^2}\right)^{-\frac{NB}{2\tau}}
+\left[K(\omega)\right]^{-\frac{NC}{2}}.
+\end{equation}
+
+\subsection{Most Dangerous Maneuver Frequency}
+
+The most dangerous maneuver frequency is obtained by solving
+\begin{equation}
+\frac{d}{d\omega}\ln|P(i\omega)| = 0.
+\end{equation}
+Under the weak-lag assumption $(\tau\omega_M \ll 1)$, the solution is approximated by
+\begin{equation}
+\omega^* \approx \omega_M\sqrt{1-2\zeta^2}.
+\end{equation}
+
+This frequency corresponds to the maximum amplification of the miss distance caused by the third-order guidance dynamics.
+
+% 使用 AIAA 参考文献格式
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,356 @@
+%!TeX bibfiles = references.bib
+
+\documentclass[11pt,a4paper]{article}
+
+% ================= Packages =================
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage{bm}
+\geometry{margin=1in}
+
+% ================= 定理环境定义 =================
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+% ================= AIAA 参考文献设置 =================
+\bibliographystyle{aiaa}
+\usepackage[numbers]{natbib}
+
+% ================= Title =================
+\title{Correction of PN Guidance Law in Frequency-Domain Against Maneuvering Targets}
+\author{Zhihao Yang \\ Harbin Institute of Technology}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper addresses the guidance design for tail-controlled missiles intercepting weaving targets. The key challenge is the varying dynamic characteristics of such missiles: at low altitudes with high dynamic pressure, the autopilot dynamics are essentially minimum-phase; however, at high altitudes, a low-frequency right-half-plane (RHP) zero emerges, degrading performance. We present two frequency-domain design methodologies tailored to these regimes. For the high $\omega_z$ (minimum-phase) regime, the design is based on the positive realness framework, which guarantees zero miss distance, finite-time stability, and provides explicit saturation bounds. This leads to the practical Zero-Miss-Distance Proportional Navigation Guidance law, requiring only line-of-sight rate measurement. For the low $\omega_z$ (non-minimum phase) regime, where the positive realness condition is fundamentally violated, a frequency-domain shaping approach is employed to directly minimize the miss-distance frequency response peak. The paper clarifies this $\omega_z$-dependent design hierarchy, unifying theoretical rigor with practical necessity for tail-controlled missile guidance.
+\end{abstract}
+
+\section{Introduction}
+Proportional navigation guidance performs poorly against targets executing sustained weaving maneuvers. For tail-controlled missiles, this problem is compounded by altitude-dependent dynamics. At high altitudes, reduced dynamic pressure leads to the appearance of a low-frequency right-half-plane zero in the missile's transfer function, significantly altering the guidance loop's frequency response and degrading the performance of both classical and many advanced guidance laws \cite{Zarchan2002}.
+
+This work synthesizes two frequency-domain design paradigms to address the full flight envelope of a tail-controlled missile. When the RHP zero frequency $\omega_z$ is sufficiently high (effective minimum-phase behavior), the positive realness framework of Gurfil et al. provides a theoretically optimal solution. When $\omega_z$ is low, violating the premises of that framework, we resort to a direct frequency-domain shaping method. The paper reviews these methods, establishing a clear design logic based on the underlying dynamics.
+
+\section{Literature Review}
+The frequency-domain analysis of missile guidance was solidified by Yanushevsky \cite{Yanushevsky2007}, who derived the miss-distance frequency response $P(j\omega)$. For tail-controlled missiles, Zarchan et al. \cite{Zarchan2002} identified the critical problem of a high-altitude RHP zero and proposed numerical compensation.
+
+The positive realness framework, developed by Gurfil, Jodorkovsky, and Guelman \cite{Gurfil1998_08, Gurfil1998_11, Gurfil2003}, establishes conditions for zero miss distance and finite-time stability. This framework leads to the practical ZMD-PNG law \cite{Gurfil_2001_08}. However, its core requirement—a positive real loop function—is incompatible with the phase lag from a low-frequency RHP zero. Thus, a different approach is needed for that regime.
+
+\section{Modeling and Problem Formulation}
+\label{sec:modeling}
+We consider the linearized engagement model with constant closing velocity. The tail-controlled missile dynamics are modeled as:
+\begin{equation}
+G(s) = \frac{1 - s^2/\omega_z^2}{(1+\tau s)\left(1 + \frac{2\zeta}{\omega_n} s + \frac{s^2}{\omega_n^2}\right)}.
+\label{eq:G_tail}
+\end{equation}
+The parameter $\omega_z$ is not fixed but decreases with increasing altitude and decreasing missile velocity \cite{Zarchan2002}. Consequently:
+\begin{itemize}
+    \item For low-altitude/high-speed flight ($\omega_z$ large), the term $(1 - s^2/\omega_z^2)$ contributes negligible phase lag in the guidance frequency band, and $G(s)$ can be treated as approximately minimum-phase.
+    \item For high-altitude/low-speed flight ($\omega_z$ small), the RHP zero introduces significant non-minimum phase lag, fundamentally altering the system's characteristics.
+\end{itemize}
+The guidance design objective is to achieve robust performance against weaving targets across both regimes.
+
+\section{Frequency-Domain Analysis and Positive Realness}
+\label{sec:analysis}
+
+\subsection{Miss-Distance Frequency Response}
+For a sinusoidal target acceleration $a_T(t)=A_T\sin(\omega t)$, the miss distance in the complex domain is given by \cite{Yanushevsky2007}:
+\begin{equation}
+Y(t_f,s) = P(t_f,s) \frac{A_T\omega}{s^2+\omega^2},
+\end{equation}
+where $P(t_f,s)$ is the transfer function from target acceleration to miss-distance. Here we substitute $s$  with $j\omega$ to denote the frequency characteristic. For the linearized PN loop, $P(t_f,j\omega)$ can be expressed as:
+\begin{equation}
+P(t_f,j\omega) = \exp\left( N \int_{j\omega}^{\infty} \frac{G(\sigma)}{\sigma} d\sigma \right).
+\label{eq:P_integral}
+\end{equation}
+The magnitude $|P(t_f,j\omega)|$ determines the miss distance amplitude. For the dynamics in Eq. \eqref{eq:G_tail}, when $\tau\omega_n\ll1$, $|P(t_f,j\omega)|$ exhibits a resonant peak at a frequency $\omega^*$ approximately given by:
+\begin{equation}
+\omega^* \approx \omega_n \sqrt{1 - 2\zeta^2}.
+\label{eq:omega_star}
+\end{equation}
+This is the most dangerous weaving frequency. When $\omega_z$ is small, the shape of $|P(t_f,j\omega)|$ changes significantly, often with increased peak magnitude.
+
+\subsection{Positive Realness Theorem and Its Implications}
+The positive realness condition provides a powerful framework for guidance design. A transfer function $H(s)$ is said to be positive real if \cite{Gurfil1998_11}:
+\begin{enumerate}
+    \item $H(s)$ is analytic in $\Re(s) > 0$,
+    \item $H(s)$ is real for real $s$,
+    \item $\Re[H(j\omega)] \geq 0$ for all $\omega$.
+\end{enumerate}
+
+\begin{theorem}[Positive Realness and Guidance Performance]
+For the linearized PN guidance loop with total dynamics $G(s)$ and compensator $K(s)$, let $H(s) = K(s)G(s)/s$. If $H(s)$ is positive real, then:
+\begin{enumerate}
+    \item The system achieves zero miss distance against any bounded deterministic target maneuver.
+    \item The guidance loop is finite-time globally absolutely asymptotically stable (FT-GAAS).
+    \item The missile acceleration satisfies the bound $\|a_M\|_\infty \leq \frac{N}{N-2} \|a_T\|_\infty$ for $N>2$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+The proof involves three parts: (1) zero miss distance follows from the biproperness condition implied by positive realness \cite{Gurfil1998_08}; (2) FT-GAAS follows from the circle criterion application \cite{Gurfil1998_11}; (3) the acceleration bound follows from $L^p$ stability analysis \cite{Gurfil2003}. Details are provided in Appendix \ref{app:proof}.
+\end{proof}
+
+This theorem establishes the design goal for the high-$\omega_z$ regime: find $K(s)$ such that $H(s)=K(s)G(s)/s$ is positive real.
+
+\subsection{Conditions for Positive Realness}
+For a rational transfer function $H(s) = b(s)/a(s)$, necessary conditions for positive realness include \cite{Gurfil1998_08}:
+\begin{enumerate}
+    \item $H(s)$ has no poles in the right half-plane,
+    \item Any poles on the imaginary axis are simple with positive residues,
+    \item $\Re[H(j\omega)] \geq 0$ for all $\omega$,
+    \item The relative degree $r[H(s)] \leq 1$.
+\end{enumerate}
+
+For $H(s) = K(s)G(s)/s$ to be positive real, $K(s)G(s)$ must be biproper. If $G(s)$ has relative degree $m$, then $K(s)$ must have relative degree $-m$, i.e., it must contain $m$ zeros to cancel the poles of $G(s)$. The ideal compensator is:
+\begin{equation}
+K(s) = \prod_{i=1}^{m} (\tau_{Z_i} s + 1).
+\label{eq:ideal_compensator}
+\end{equation}
+
+\section{Guidance Design for the High-$\omega_z$ Regime}
+\label{sec:design_highwz}
+
+\subsection{Compensator Design}
+When $\omega_z$ is large, $G(s)$ in Eq. \eqref{eq:G_tail} is treated as minimum-phase with relative degree $m=3$ (considering the third-order denominator). The ideal compensator from Eq. \eqref{eq:ideal_compensator} would be a triple lead network. However, pure differentiation amplifies noise excessively. A practical lead-lag implementation is:
+\begin{equation}
+K(s) = \frac{\prod_{i=1}^{m} (\tau_{Z_i} s + 1)}{\prod_{i=1}^{m} (\tau_{P_i} s + 1)}, \quad \tau_{P_i} \ll \tau_{Z_i}.
+\label{eq:practical_compensator}
+\end{equation}
+The time constants $\tau_{Z_i}$ are chosen to provide sufficient phase lead around $\omega^*$ to make $\Re[K(j\omega)G(j\omega)/j\omega] \geq 0$ in the critical frequency range.
+
+\subsection{Equivalent LOS Rate Implementation}
+The compensator $K(s)$ can be implemented using the equivalent LOS rate concept \cite{Gurfil_2001_08}. Let $\dot{\lambda}_{m}$ be the measured LOS rate. Define the equivalent LOS rate as:
+\begin{equation}
+\dot{\lambda}_{eq}(t) = \hat{\dot{\lambda}} + h_1 \hat{\ddot{\lambda}} + h_2 \hat{\dddot{\lambda}} = \mathbf{h}^T \hat{\bm{\Lambda}},
+\label{eq:equivalent_los}
+\end{equation}
+where $\hat{\bm{\Lambda}} = [\hat{\dot{\lambda}}, \hat{\ddot{\lambda}}, \hat{\dddot{\lambda}}]^T$ are estimates from the noisy measurement $\dot{\lambda}_m$. The guidance command is:
+\begin{equation}
+a_c(t) = N V_c \dot{\lambda}_{eq}(t).
+\label{eq:ZMD_cmd}
+\end{equation}
+
+\subsection{State Estimation}
+The estimates $\hat{\bm{\Lambda}}$ are obtained using a Kalman-Bucy filter based on a kinematic model of the LOS rate. The state-space model is:
+\begin{equation}
+\dot{\bm{\Lambda}}(t) = \mathbf{A} \bm{\Lambda}(t) + \mathbf{g} w(t), \quad \dot{\lambda}_m(t) = \mathbf{c}^T \bm{\Lambda}(t) + v(t),
+\label{eq:state_space_model}
+\end{equation}
+where $w(t)$ and $v(t)$ are process and measurement noises, respectively. The filter equations are:
+\begin{align}
+\dot{\hat{\bm{\Lambda}}}(t) &= \mathbf{A} \hat{\bm{\Lambda}}(t) + \mathbf{k}[\dot{\lambda}_m(t) - \mathbf{c}^T \hat{\bm{\Lambda}}(t)], \\
+\mathbf{k} &= \mathbf{P} \mathbf{c} / r, \\
+\mathbf{A}\mathbf{P} + \mathbf{P}\mathbf{A}^T + \tilde{q}\mathbf{g}\mathbf{g}^T - \mathbf{P}\mathbf{c}\mathbf{c}^T\mathbf{P}/r &= 0,
+\label{eq:kalman_filter}
+\end{align}
+where $\mathbf{P}$ is the error covariance, $r$ is the measurement noise variance, and $\tilde{q}$ is the process noise intensity.
+
+The weighting vector $\mathbf{h}$ in Eq. \eqref{eq:equivalent_los} is chosen so that the transfer function from $\dot{\lambda}_m$ to $\dot{\lambda}_{eq}$ approximates $K(s)$ in the frequency band of interest. Detailed derivation of the filter and $\mathbf{h}$ selection is in Appendix \ref{app:estimation}.
+
+\subsection{Navigation Ratio Selection}
+From Theorem 1, to avoid saturation while ensuring zero miss distance, the navigation ratio must satisfy:
+\begin{equation}
+N \geq \frac{2\mu_0}{\mu_0 - 1}, \quad \mu_0 = \frac{a_{M_{\max}}}{a_{T_{\max}}} > 1.
+\label{eq:N_selection}
+\end{equation}
+
+\section{Guidance Design for the Low-$\omega_z$ Regime}
+\label{sec:design_lowwz}
+When $\omega_z$ is small, the RHP zero makes it impossible to satisfy the positive realness condition over all frequencies. The design goal shifts to directly minimizing the peak of $|P(j\omega)|$.
+
+\subsection{Miss-Distance Frequency Response with RHP Zero}
+For the dynamics in Eq. \eqref{eq:G_tail} with small $\omega_z$, the integral in Eq. \eqref{eq:P_integral} can be evaluated to obtain an explicit expression for $|P(j\omega)|$ (see Appendix \ref{app:miss_calc}). The result shows that the RHP zero increases the peak magnitude and may shift $\omega^*$.
+
+\subsection{Theoretical Foundation: Optimal Control Formulation}
+The frequency-domain shaping approach can be derived from an optimal control perspective. Consider the linearized engagement model with state vector $\mathbf{x} = [y, \dot{y}, a_M, \dot{a}_M, \ddot{a}_M]^T$, where $y$ is the relative displacement normal to LOS. The system dynamics including the RHP zero can be represented as \cite{Zarchan2002}:
+\begin{equation}
+\dot{\mathbf{x}}(t) = \mathbf{A} \mathbf{x}(t) + \mathbf{B} a_c(t) + \mathbf{D} a_T(t),
+\label{eq:state_dynamics}
+\end{equation}
+where $\mathbf{A}$ incorporates the tail-controlled dynamics from Eq. \eqref{eq:G_tail}.
+
+The objective is to minimize miss distance at interception while penalizing excessive control effort. This leads to the quadratic cost function:
+\begin{equation}
+J = \mathbf{x}^T(t_f) \mathbf{Q}_f \mathbf{x}(t_f) + \int_{t_0}^{t_f} [a_c^2(\tau) + \rho a_T^2(\tau)] d\tau,
+\label{eq:quadratic_cost}
+\end{equation}
+where $\mathbf{Q}_f$ is a positive semi-definite matrix with $\mathbf{Q}_f(1,1) = 1$ (penalizing final miss distance), and $\rho$ is a weighting parameter.
+
+\subsection{Optimal Solution and Time-Varying Gain}
+The optimal control law minimizing Eq. \eqref{eq:quadratic_cost} subject to Eq. \eqref{eq:state_dynamics} is given by the linear-quadratic regulator (LQR) solution:
+\begin{equation}
+a_c^*(t) = -\mathbf{K}(t) \mathbf{x}(t),
+\label{eq:optimal_control}
+\end{equation}
+where $\mathbf{K}(t)$ is obtained by solving the differential Riccati equation backward in time.
+
+For implementation with only LOS rate measurement available, we need to express Eq. \eqref{eq:optimal_control} in terms of $\dot{\lambda}$. Using the relationship $y = R\lambda \approx V_c t_{go} \lambda$ and $\dot{y} = V_c (\lambda + t_{go} \dot{\lambda})$ under small-angle assumptions, the optimal control can be reformulated as \cite{Yanushevsky2007}:
+\begin{equation}
+a_c^*(t) = N_{eff}(t_{go}) V_c \dot{\lambda}(t) + \text{terms involving estimated states}.
+\label{eq:reformulated_control}
+\end{equation}
+
+The time-varying gain $N_{eff}(t_{go})$ emerges from this transformation and is given by:
+\begin{equation}
+N_{eff}(t_{go}) = \frac{\mathbf{K}(t) \mathbf{T}(t_{go})}{V_c},
+\label{eq:Neff_definition}
+\end{equation}
+where $\mathbf{T}(t_{go})$ is the transformation matrix relating $\mathbf{x}$ to $\dot{\lambda}$.
+
+\subsection{Theoretical Justification from Frequency Domain}
+The connection to frequency-domain shaping comes from analyzing the resulting closed-loop transfer function. The magnitude of the miss-distance frequency response becomes:
+\begin{equation}
+|P(j\omega)| = \left| \frac{W(j\omega)}{1 + N_{eff}(j\omega) H(j\omega)} \right|,
+\label{eq:closed_loop_P}
+\end{equation}
+where $H(j\omega) = G(j\omega)/(j\omega)$ and $W(j\omega)$ accounts for the RHP zero effect. The gain $N_{eff}$ is designed to minimize the peak of $|P(j\omega)|$ over frequency, which is equivalent to solving a minimax optimization problem:
+\begin{equation}
+\min_{N_{eff}(\cdot)} \max_{\omega} |P(j\omega)|.
+\label{eq:minimax_problem}
+\end{equation}
+
+It can be shown that the LQR solution in Eq. \eqref{eq:optimal_control} provides an approximate solution to this minimax problem, particularly when $\rho$ in Eq. \eqref{eq:quadratic_cost} is chosen to balance miss distance reduction against control effort \cite{Yanushevsky2007, Zarchan2002}.
+
+\subsection{Practical Implementation via Gain Scheduling}
+Since analytical solutions for $N_{eff}(t_{go})$ are intractable for high-order systems with RHP zeros, numerical synthesis is employed:
+\begin{enumerate}
+    \item Discretize $t_{go}$ over the expected engagement range.
+    \item For each $t_{go}$, solve the LQR problem (or the associated Riccati equation) numerically.
+    \item Extract $N_{eff}(t_{go})$ from the optimal feedback gains using Eq. \eqref{eq:Neff_definition}.
+    \item Store $N_{eff}(t_{go})$ in a lookup table for onboard implementation.
+\end{enumerate}
+
+This approach directly addresses the performance degradation caused by the RHP zero and can be viewed as a form of gain scheduling where the schedule is determined by optimal control theory.
+
+\section{Simulation and Comparative Analysis}
+\label{sec:simulation}
+\textit{(Placeholder for simulation discussion)} Conceptual simulation studies would demonstrate two key points: 1) In the high-$\omega_z$ regime, ZMD-PNG achieves near-zero miss distance where classical PN fails, and outperforms a standard OGL designed for first-order lag. 2) In the low-$\omega_z$ regime, the frequency-domain shaping law recovers performance that is severely degraded under both PN and the mismatched OGL, validating the need for the regime-specific approach.
+
+\section{Discussion and Conclusion}
+The guidance design for tail-controlled missiles against weaving targets must account for the varying dynamics across the flight envelope. The parameter $\omega_z$ serves as the key discriminant:
+\begin{itemize}
+    \item \textbf{High-$\omega_z$ (Approx. Minimum-Phase):} The positive realness framework provides an optimal guidance solution (ZMD-PNG) with theoretical performance guarantees.
+    \item \textbf{Low-$\omega_z$ (Non-Minimum Phase):} The frequency-domain shaping approach is necessary to mitigate the detrimental effects of the RHP zero.
+\end{itemize}
+This work reviewed these two methodologies, presenting a unified perspective on tail-controlled missile guidance that transitions from a theoretically optimal solution to a necessary practical compensation based on the underlying flight conditions.
+
+\appendix
+\section{Proof of Theorem 1}
+\label{app:proof}
+This appendix provides the detailed proof of Theorem 1, which connects positive realness to guidance performance.
+
+\subsection{Zero Miss Distance Condition}
+Following \cite{Gurfil1998_08}, the miss distance for any input is zero if and only if the transfer function $G_c(s) = K(s)G(s)$ is biproper. For $H(s) = G_c(s)/s$ to be positive real, it must have relative degree $r[H(s)] \leq 1$. Since $1/s$ has relative degree 1, this implies $r[G_c(s)] = 0$, i.e., $G_c(s)$ is biproper. Hence, positive realness implies zero miss distance.
+
+\subsection{Finite-Time Stability}
+The guidance loop can be represented as a Lur'e problem with time-varying gain $1/t_{go}$. By the circle criterion, if $H(s)$ is positive real, then the system is finite-time globally absolutely asymptotically stable for all $t_{go} > 0$ \cite{Gurfil1998_11}.
+
+\subsection{Acceleration Bound}
+For the system with $H(s) = NG(s)/s$, if $H(s)$ is positive real, then from the small gain theorem, the $L^\infty$ gain from $a_T$ to $a_M$ is bounded by $N/(N-2)$ \cite{Gurfil2003}. This provides the saturation avoidance guarantee.
+
+\section{State Estimation and Weight Selection}
+\label{app:estimation}
+This appendix details the state estimator design and weight vector selection for the ZMD-PNG implementation.
+
+\subsection{Kinematic Model}
+The LOS rate dynamics can be modeled as an exponentially correlated random process. The highest derivative (e.g., LOS jerk) is modeled as:
+\begin{equation}
+\dddot{\lambda} = -\frac{1}{\tau_E} \ddot{\lambda} + \frac{1}{\tau_E} w(t),
+\end{equation}
+where $\tau_E$ is the correlation time. This leads to the state-space model in Eq. \eqref{eq:state_space_model}.
+
+\subsection{Kalman Filter Derivation}
+The steady-state Kalman filter gain is obtained by solving the algebraic Riccati equation in Eq. \eqref{eq:kalman_filter}. The solution depends on the noise statistics $r$ and $\tilde{q}$, which are tuning parameters.
+
+\subsection{Weight Vector Selection}
+The weight vector $\mathbf{h}$ should be chosen such that the frequency response of $\mathbf{h}^T(s\mathbf{I} - \mathbf{A}_f)^{-1}\mathbf{k}$ approximates the ideal compensator $K(s)$ in Eq. \eqref{eq:ideal_compensator} over the guidance bandwidth, where $\mathbf{A}_f = \mathbf{A} - \mathbf{k}\mathbf{c}^T$. This can be formulated as a frequency-domain fitting problem.
+
+\section{Miss-Distance Calculation for Non-Minimum Phase Systems}
+\label{app:miss_calc}
+This appendix derives the miss-distance frequency response for systems with RHP zeros.
+
+\subsection{Evaluation of the Integral}
+For $G(s)$ in Eq. \eqref{eq:G_tail}, the integral in Eq. \eqref{eq:P_integral} can be decomposed using partial fractions. The RHP zero contributes a term:
+\begin{equation}
+\int_{j\omega}^{\infty} \frac{1 - \sigma^2/\omega_z^2}{\sigma} d\sigma = \ln\left(\frac{j\omega}{\omega_z}\right) + \text{terms from other poles}.
+\end{equation}
+This leads to additional phase and magnitude contributions that increase $|P(j\omega)|$ when $\omega_z$ is small.
+
+\section{Gain Synthesis for Frequency-Domain Shaping}
+\label{app:gain_synthesis}
+This appendix details the numerical procedure for synthesizing $N_{eff}(t_{go})$ and provides the theoretical justification.
+
+\subsection{Optimal Control Formulation with RHP Zero}
+Consider the state-space representation of the tail-controlled missile dynamics including the RHP zero:
+\begin{equation}
+\begin{aligned}
+\dot{\mathbf{x}} &= \mathbf{A} \mathbf{x} + \mathbf{B} a_c + \mathbf{D} a_T, \\
+y &= \mathbf{C} \mathbf{x},
+\end{aligned}
+\end{equation}
+where $\mathbf{x}$ includes relative position, velocity, missile acceleration states, and possibly target maneuver states if estimated.
+
+The cost function in Eq. \eqref{eq:quadratic_cost} balances final miss distance against control effort and target maneuver magnitude. The optimal control law is:
+\begin{equation}
+a_c^*(t) = -\mathbf{R}^{-1} \mathbf{B}^T \mathbf{P}(t) \mathbf{x}(t),
+\end{equation}
+where $\mathbf{P}(t)$ satisfies the differential Riccati equation:
+\begin{equation}
+-\dot{\mathbf{P}}(t) = \mathbf{A}^T \mathbf{P}(t) + \mathbf{P}(t) \mathbf{A} - \mathbf{P}(t) \mathbf{B} \mathbf{R}^{-1} \mathbf{B}^T \mathbf{P}(t) + \mathbf{Q},
+\end{equation}
+with boundary condition $\mathbf{P}(t_f) = \mathbf{Q}_f$.
+
+\subsection{Transformation to LOS Rate Formulation}
+Under the linearized geometry assumptions, we have:
+\begin{equation}
+\dot{\lambda} = \frac{\dot{y}}{V_c t_{go}} - \frac{y}{V_c t_{go}^2}.
+\end{equation}
+The state vector can be expressed in terms of $\dot{\lambda}$ and other states through a linear transformation $\mathbf{x} = \mathbf{T}(t_{go}) \mathbf{z}$, where $\mathbf{z} = [\dot{\lambda}, \xi_1, \xi_2, \ldots]^T$ contains $\dot{\lambda}$ and other unmeasured states. Substituting into the optimal control law yields:
+\begin{equation}
+a_c^*(t) = -\mathbf{R}^{-1} \mathbf{B}^T \mathbf{P}(t) \mathbf{T}(t_{go}) \mathbf{z}(t).
+\end{equation}
+If we approximate $\mathbf{z}(t)$ by $[\dot{\lambda}(t), 0, \ldots, 0]^T$ (i.e., neglecting the unmeasured states or assuming they are small), we obtain:
+\begin{equation}
+a_c^*(t) \approx N_{eff}(t_{go}) V_c \dot{\lambda}(t),
+\end{equation}
+where
+\begin{equation}
+N_{eff}(t_{go}) = -\frac{1}{V_c} [\mathbf{R}^{-1} \mathbf{B}^T \mathbf{P}(t) \mathbf{T}(t_{go})]_{1},
+\end{equation}
+with $[\cdot]_{1}$ denoting the first element corresponding to $\dot{\lambda}$.
+
+\subsection{Connection to Frequency-Domain Shaping}
+The closed-loop transfer function from target acceleration to miss distance with this control law is:
+\begin{equation}
+P(s) = \frac{e^{-N_{eff} \int_s^\infty \frac{G(\sigma)}{\sigma} d\sigma}}{s^2}.
+\end{equation}
+For sinusoidal target maneuvers $a_T(t) = A_T \sin(\omega t)$, the miss distance magnitude is $|P(j\omega)|A_T/\omega^2$. The gain $N_{eff}$ is chosen to minimize the worst-case (maximum) value of $|P(j\omega)|$ over $\omega$, which corresponds to the minimax problem in Eq. \eqref{eq:minimax_problem}.
+
+The LQR formulation provides a computationally tractable method to approximate this solution. The weighting parameter $\rho$ in Eq. \eqref{eq:quadratic_cost} controls the trade-off: smaller $\rho$ leads to more aggressive control (lower miss distance but higher $N_{eff}$), while larger $\rho$ reduces control effort at the cost of increased miss distance.
+
+\subsection{Numerical Implementation}
+The synthesis procedure follows these steps:
+\begin{enumerate}
+    \item Discretize time-to-go from $t_{go}^{\min}$ to $t_{go}^{\max}$ with step $\Delta t_{go}$.
+    \item For each $t_{go}$ value, compute $\mathbf{P}(t)$ by solving the Riccati equation backward from $t_f$ to $t_0$.
+    \item Compute $N_{eff}(t_{go})$ using the transformation above.
+    \item For real-time implementation, store $(t_{go}, N_{eff})$ pairs in a lookup table.
+    \item During flight, interpolate $N_{eff}$ based on estimated $t_{go}$.
+\end{enumerate}
+This method, while computationally intensive offline, yields a practical guidance law that accounts for the detrimental effects of the RHP zero.
+
+\bibliography{references}
+\end{document}

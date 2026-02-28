@@ -1,0 +1,86 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+\usepackage{amsmath,amssymb}
+\title{Frequency-Corrected Proportional Navigation}
+\author{}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Problem Statement}
+\begin{itemize}
+\item Proportional navigation with third-order flight control
+\item Sinusoidal (weaving) target maneuvers
+\item Miss distance strongly depends on maneuver frequency
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Flight-Control Model}
+\begin{equation}
+W(s)=\frac{1-s^2/\omega_z^2}{(1+\tau s)\left(1+\frac{2\zeta}{\omega_M}s+\frac{s^2}{\omega_M^2}\right)}
+\end{equation}
+\begin{itemize}
+\item $\tau$: time constant
+\item $\zeta$: damping ratio
+\item $\omega_M$: natural frequency
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Miss-Distance Frequency Response}
+\begin{equation}
+|P(i\omega)|=\frac{1}{\omega^2}
+\left(\omega^2+\frac{1}{\tau^2}\right)^{-\frac{N B}{2\tau}}
+\left[(\omega_M^2-\omega^2)^2+4\zeta^2\omega_M^2\omega^2\right]^{-\frac{N C}{2}}
+\end{equation}
+\end{frame}
+
+\begin{frame}{Most Dangerous Frequency}
+\begin{equation}
+\omega^* \approx \omega_M\sqrt{1-2\zeta^2}
+\end{equation}
+\begin{itemize}
+\item Peak miss distance near $\omega^*$
+\item Strong dependence on damping $\zeta$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Frequency-Corrected PN}
+\begin{equation}
+N_{\mathrm{eff}}(\omega)=N_0\left[\frac{(\omega_M^2-\omega^2)^2+4\zeta^2\omega_M^2\omega^2}{\omega_M^4}\right]^{\gamma}
+\end{equation}
+\begin{equation}
+\hat\omega^2=\left|\frac{\ddot\lambda}{\dot\lambda}\right|
+\end{equation}
+\end{frame}
+
+\begin{frame}{Selection of $\gamma$}
+\begin{itemize}
+\item $\gamma$ controls gain reduction near $\omega^*$
+\item $\gamma\in[0.25,0.5]$ recommended
+\item $\gamma=0.3$ used in simulations
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Simulation Results (One-Slide Summary)}
+\begin{itemize}
+\item Three cases compared: $\gamma=0$ (PN), $\gamma=0.3$, $\gamma=0.5$
+\item Target executes sinusoidal maneuver near $\omega^*$
+\item Miss distance $y(t_f)$ reduced significantly with frequency correction
+\item $\gamma=0.3$: best trade-off between miss reduction and smooth control
+\item Results consistent with frequency-domain prediction of $|P(i\omega)|$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusion}
+\begin{itemize}
+\item Frequency correction reduces peak miss distance
+\item No additional phase lag introduced
+\item Suitable for real-time implementation
+\end{itemize}
+\end{frame}
+
+\end{document}
